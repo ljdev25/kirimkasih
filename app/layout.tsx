@@ -1,28 +1,51 @@
 import type { Metadata } from "next";
-import { Bricolage_Grotesque, Hanken_Grotesk, Space_Mono } from "next/font/google";
+import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
-const bricolageGrotesque = Bricolage_Grotesque({
-  variable: "--font-bricolage",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
-const hankenGrotesk = Hanken_Grotesk({
-  variable: "--font-hanken",
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["500", "600", "700", "800"],
 });
 
-const spaceMono = Space_Mono({
-  variable: "--font-space-mono",
-  subsets: ["latin"],
-  weight: ["400", "700"],
-});
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const title = "KasihKirim — Penghantaran & Beli-Belah Tempatan Sabah";
+const description =
+  "KasihKirim ialah platform penghantaran Sabah yang menghubungkan penghantar, pemandu dan peniaga tempatan. Hantar bungkusan dari kampung ke bandar, beli-belah tempatan, dan jejak penghantaran secara langsung.";
 
 export const metadata: Metadata = {
-  title: "Kasih Kirim — Kirim dengan kasih, dari kampung ke bandar",
-  description:
-    "Kasih Kirim menyambungkan kampung dan bandar melalui penghantar tidak formal yang memang dalam perjalanan. Hantar barang, jadi kurier, atau bawa & jual hasil kampung.",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: title,
+    template: "%s — KasihKirim",
+  },
+  description,
+  keywords: [
+    "KasihKirim",
+    "penghantaran Sabah",
+    "beli-belah tempatan",
+    "kurier Sabah",
+    "hantar barang Sabah",
+    "peniaga tempatan Sabah",
+  ],
+  openGraph: {
+    title,
+    description,
+    url: "/",
+    siteName: "KasihKirim",
+    locale: "ms_MY",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+  },
 };
 
 export default function RootLayout({
@@ -33,7 +56,7 @@ export default function RootLayout({
   return (
     <html
       lang="ms"
-      className={`${bricolageGrotesque.variable} ${hankenGrotesk.variable} ${spaceMono.variable}`}
+      className={`scroll-smooth ${inter.variable} ${plusJakartaSans.variable}`}
     >
       <body>{children}</body>
     </html>

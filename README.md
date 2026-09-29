@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# KasihKirim — Landing Page
 
-## Getting Started
+Landing page marketing untuk KasihKirim — app peer-to-peer delivery & beli-belah tempatan khusus
+Sabah. Repo ini adalah website promosi sahaja (bukan aplikasi mobile itu sendiri).
 
-First, run the development server:
+Dibina dengan Next.js 16 (App Router), TypeScript, Tailwind CSS v4, dan Supabase (borang
+permohonan Pemandu/Penjual). Lihat [`DESIGN.md`](./DESIGN.md) untuk design system (warna, font,
+komponen `components/ui/`).
+
+## Run local
 
 ```bash
+npm install
+cp .env.local.example .env.local   # isikan value sebenar — lihat "Env vars" di bawah
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Buka [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Skrip lain yang berguna:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build         # production build
+npm run start          # jalankan production build tempatan
+npm run lint            # ESLint
+npm run format         # Prettier — tulis semula fail
+npm run format:check   # Prettier — semak sahaja
+```
 
-## Learn More
+## Env vars
 
-To learn more about Next.js, take a look at the following resources:
+Semua env vars ada dalam [`.env.local.example`](./.env.local.example):
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Var | Kegunaan | Wajib? |
+|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | URL project Supabase | Ya — borang Pemandu/Penjual guna ini untuk insert |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Anon/public key Supabase (bukan `service_role`) | Ya |
+| `NEXT_PUBLIC_SITE_URL` | URL penuh site production (contoh `https://kasihkirim.com`) | Tidak wajib tempatan — default `http://localhost:3000`; wajib diisi di production untuk Open Graph/SEO betul |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Pangkalan data (Supabase)
 
-## Deploy on Vercel
+Migration SQL ada dalam [`supabase/migrations/`](./supabase/migrations):
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `driver_applications` — borang "Mohon Jadi Pemandu"
+- `seller_applications` — borang "Mohon Jadi Penjual"
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Kedua-dua table ada Row Level Security enabled dengan satu policy sahaja: `anon` boleh **insert**
+sahaja (dengan `status` dipaksa `'pending'`), tiada akses select/update/delete langsung dari
+client. Jalankan migration ini di project Supabase anda (Supabase Dashboard → SQL Editor, paste
+kandungan fail, run — atau guna Supabase CLI: `supabase db push` jika project sudah link).
+
+Borang dihantar melalui Next.js **Server Actions** (`app/actions/apply-driver.ts`,
+`app/actions/apply-seller.ts`) yang guna anon key sahaja di server — `service_role` key tidak
+pernah digunakan atau didedahkan kat client.
+
+## Deploy ke Vercel
+
+1. Push repo ni ke GitHub/GitLab/Bitbucket.
+2. Di [vercel.com/new](https://vercel.com/new), import repo — Vercel auto-detect Next.js, tak
+   perlu ubah build command (`next build`) atau output directory.
+3. Dalam **Project Settings → Environment Variables**, tambah ketiga-tiga env vars di atas
+   (`NEXT_PUBLIC_SITE_URL` diisi dengan domain Vercel/custom domain sebenar).
+4. Deploy. Pastikan `npm run build` berjaya tempatan dahulu sebelum push (lihat di bawah).
+
+## Sebelum deploy — checklist
+
+- [ ] `npm run build` berjaya tanpa error
+- [ ] `npm run lint` bersih
+- [ ] Migration SQL sudah dijalankan di project Supabase production
+- [ ] Env vars sudah diisi di Vercel (termasuk `NEXT_PUBLIC_SITE_URL` dengan domain sebenar)
+- [ ] Test hantar borang Pemandu & Penjual di production, sahkan row masuk dalam Supabase
